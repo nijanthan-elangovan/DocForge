@@ -42,17 +42,17 @@ export const GEMINI_MODEL_LABELS: Record<GeminiModel, string> = {
 };
 
 export type OpenRouterModel =
-  | "google/gemma-4-31b-it:free"
   | "nvidia/nemotron-3-super-120b-a12b:free"
-  | "qwen/qwen3-coder:free"
   | "openai/gpt-oss-120b:free"
+  | "google/gemma-4-31b-it:free"
+  | "qwen/qwen3-coder:free"
   | "qwen/qwen3-next-80b-a3b-instruct:free";
 
 export const OPENROUTER_MODEL_LABELS: Record<OpenRouterModel, string> = {
-  "google/gemma-4-31b-it:free": "Google Gemma 4 31B (Free)",
   "nvidia/nemotron-3-super-120b-a12b:free": "NVIDIA Nemotron 3 Super 120B (Free)",
-  "qwen/qwen3-coder:free": "Qwen 3 Coder 480B (Free)",
   "openai/gpt-oss-120b:free": "OpenAI GPT-OSS 120B (Free)",
+  "google/gemma-4-31b-it:free": "Google Gemma 4 31B (Free)",
+  "qwen/qwen3-coder:free": "Qwen 3 Coder 480B (Free)",
   "qwen/qwen3-next-80b-a3b-instruct:free": "Qwen 3 Next 80B (Free)",
 };
 

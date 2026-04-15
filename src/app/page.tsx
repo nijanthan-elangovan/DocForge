@@ -19,7 +19,7 @@ const DEFAULT_SETTINGS: DocSettings = {
   surface: "api-doc",
   provider: "openrouter",
   geminiModel: "gemini-2.0-flash-lite",
-  openrouterModel: "google/gemma-4-31b-it:free",
+  openrouterModel: "nvidia/nemotron-3-super-120b-a12b:free",
 };
 
 const GEMINI_KEY_STORAGE = "docforge-gemini-key";

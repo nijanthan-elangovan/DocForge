@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(shopt -s dotglob)",
+      "Bash(mv ghostwriter-app/* .)",
+      "Bash(mv ghostwriter-app/.* .)",
+      "Bash(rmdir ghostwriter-app:*)",
+      "Bash(npm run:*)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\202211578\\OneDrive - Euclid Innovations\\Documents\\GhostWriter\\src\\app\\shared"
+    ]
+  }
+}

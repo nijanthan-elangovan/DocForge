@@ -13,6 +13,14 @@ import {
   Loader2,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface PreviewPanelProps {
   markdown: string;
@@ -32,10 +40,7 @@ export default function PreviewPanel({
   const handleCopy = async () => {
     await navigator.clipboard.writeText(markdown);
     setCopied(true);
-    toast.success("Copied to clipboard", {
-      className: "toast-custom",
-      iconTheme: { primary: "#6366f1", secondary: "#fff" },
-    });
+    toast.success("Copied to clipboard");
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -51,15 +56,10 @@ export default function PreviewPanel({
       if (data.id) {
         const shareUrl = `${window.location.origin}/shared/${data.id}`;
         await navigator.clipboard.writeText(shareUrl);
-        toast.success("Share link copied!", {
-          className: "toast-custom",
-          iconTheme: { primary: "#6366f1", secondary: "#fff" },
-        });
+        toast.success("Share link copied!");
       }
     } catch {
-      toast.error("Failed to create share link", {
-        className: "toast-custom",
-      });
+      toast.error("Failed to create share link");
     } finally {
       setSharing(false);
     }
@@ -73,112 +73,120 @@ export default function PreviewPanel({
     a.download = `${title || "document"}.md`;
     a.click();
     URL.revokeObjectURL(url);
-    toast.success("Document downloaded", {
-      className: "toast-custom",
-      iconTheme: { primary: "#6366f1", secondary: "#fff" },
-    });
+    toast.success("Document downloaded");
   };
 
   return (
-    <div className="glass fade-in flex flex-col flex-1 min-h-0">
-      {/* Header */}
-      <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.04]">
-        <div className="flex items-center gap-2.5">
-          <Eye className="w-4 h-4 text-indigo-400" />
-          <span className="text-sm font-medium text-white/90">
-            Document Preview
-          </span>
-        </div>
+    <Card className="flex flex-col flex-1 min-h-0">
+      <CardHeader className="pb-3 space-y-0">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-sm font-medium">Preview</CardTitle>
 
-        <div className="flex items-center gap-1.5">
-          {/* View mode toggle */}
-          <div className="flex items-center bg-white/[0.04] rounded-lg p-0.5">
-            <button
-              onClick={() => setViewMode("preview")}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs transition-all ${
-                viewMode === "preview"
-                  ? "bg-white/[0.08] text-white/90"
-                  : "text-white/40 hover:text-white/60"
-              }`}
+          <div className="flex items-center gap-1">
+            <Tabs
+              value={viewMode}
+              onValueChange={(v) =>
+                setViewMode(v as "preview" | "markdown")
+              }
             >
-              <Eye className="w-3 h-3" />
-              Preview
-            </button>
-            <button
-              onClick={() => setViewMode("markdown")}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs transition-all ${
-                viewMode === "markdown"
-                  ? "bg-white/[0.08] text-white/90"
-                  : "text-white/40 hover:text-white/60"
-              }`}
-            >
-              <Code className="w-3 h-3" />
-              Markdown
-            </button>
-          </div>
+              <TabsList className="h-7">
+                <TabsTrigger
+                  value="preview"
+                  className="text-xs px-2.5 h-5 gap-1"
+                >
+                  <Eye className="h-3 w-3" />
+                  Preview
+                </TabsTrigger>
+                <TabsTrigger
+                  value="markdown"
+                  className="text-xs px-2.5 h-5 gap-1"
+                >
+                  <Code className="h-3 w-3" />
+                  Markdown
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
 
-          {/* Actions */}
-          {markdown && (
-            <div className="flex items-center gap-1 ml-2">
-              <button
-                onClick={handleCopy}
-                className="p-2 rounded-lg text-white/30 hover:text-white/70 hover:bg-white/[0.04] transition-all"
-                title="Copy"
-              >
-                {copied ? (
-                  <Check className="w-3.5 h-3.5 text-emerald-400" />
-                ) : (
-                  <Copy className="w-3.5 h-3.5" />
-                )}
-              </button>
-              <button
-                onClick={handleDownload}
-                className="p-2 rounded-lg text-white/30 hover:text-white/70 hover:bg-white/[0.04] transition-all"
-                title="Download"
-              >
-                <Download className="w-3.5 h-3.5" />
-              </button>
-              <button
-                onClick={handleShare}
-                disabled={sharing}
-                className="p-2 rounded-lg text-white/30 hover:text-white/70 hover:bg-white/[0.04] transition-all disabled:opacity-50"
-                title="Share"
-              >
-                {sharing ? (
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                ) : (
-                  <Share2 className="w-3.5 h-3.5" />
-                )}
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
+            {markdown && (
+              <div className="flex items-center gap-0.5 ml-1">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7"
+                      onClick={handleCopy}
+                    >
+                      {copied ? (
+                        <Check className="h-3.5 w-3.5 text-emerald-400" />
+                      ) : (
+                        <Copy className="h-3.5 w-3.5" />
+                      )}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Copy</TooltipContent>
+                </Tooltip>
 
-      {/* Content */}
-      <div className="flex-1 min-h-0 overflow-y-auto p-6">
-        {isGenerating ? (
-          <div className="flex flex-col items-center justify-center h-full gap-4">
-            <div className="relative">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center pulse-glow">
-                <Loader2 className="w-6 h-6 text-indigo-400 animate-spin" />
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7"
+                      onClick={handleDownload}
+                    >
+                      <Download className="h-3.5 w-3.5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Download .md</TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7"
+                      onClick={handleShare}
+                      disabled={sharing}
+                    >
+                      {sharing ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <Share2 className="h-3.5 w-3.5" />
+                      )}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Share link</TooltipContent>
+                </Tooltip>
               </div>
+            )}
+          </div>
+        </div>
+      </CardHeader>
+
+      <CardContent className="flex-1 min-h-0 overflow-y-auto pt-0">
+        {isGenerating ? (
+          <div className="flex flex-col items-center justify-center h-full gap-4 py-16">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+              <Loader2 className="h-5 w-5 text-primary animate-spin" />
             </div>
             <div className="text-center">
-              <p className="text-sm text-white/50">Generating documentation...</p>
-              <p className="text-xs text-white/25 mt-1">
+              <p className="text-sm text-muted-foreground">
+                Generating documentation...
+              </p>
+              <p className="text-xs text-muted-foreground/50 mt-1">
                 This may take a few seconds
               </p>
             </div>
-            {/* Skeleton */}
-            <div className="w-full max-w-lg space-y-3 mt-4">
-              <div className="h-6 w-3/4 rounded-lg shimmer" />
-              <div className="h-4 w-full rounded-lg shimmer" />
-              <div className="h-4 w-5/6 rounded-lg shimmer" />
-              <div className="h-4 w-2/3 rounded-lg shimmer" />
-              <div className="h-6 w-1/2 rounded-lg shimmer mt-6" />
-              <div className="h-4 w-full rounded-lg shimmer" />
-              <div className="h-4 w-4/5 rounded-lg shimmer" />
+            <div className="w-full max-w-md space-y-3 mt-4">
+              <div className="h-5 w-3/4 shimmer" />
+              <div className="h-4 w-full shimmer" />
+              <div className="h-4 w-5/6 shimmer" />
+              <div className="h-4 w-2/3 shimmer" />
+              <div className="h-5 w-1/2 shimmer mt-6" />
+              <div className="h-4 w-full shimmer" />
+              <div className="h-4 w-4/5 shimmer" />
             </div>
           </div>
         ) : markdown ? (
@@ -189,24 +197,24 @@ export default function PreviewPanel({
               </ReactMarkdown>
             </div>
           ) : (
-            <pre className="text-sm text-white/70 font-mono leading-relaxed whitespace-pre-wrap break-words">
+            <pre className="text-sm text-muted-foreground font-mono leading-relaxed whitespace-pre-wrap break-words">
               {markdown}
             </pre>
           )
         ) : (
-          <div className="flex flex-col items-center justify-center h-full text-center">
-            <div className="w-16 h-16 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center mb-4">
-              <Eye className="w-7 h-7 text-white/10" />
+          <div className="flex flex-col items-center justify-center h-full text-center py-16">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl border bg-muted/50 mb-4">
+              <Eye className="h-5 w-5 text-muted-foreground/30" />
             </div>
-            <p className="text-sm text-white/30">
+            <p className="text-sm text-muted-foreground">
               Your generated document will appear here
             </p>
-            <p className="text-xs text-white/15 mt-1">
-              Configure settings, add your input, and hit Generate
+            <p className="text-xs text-muted-foreground/50 mt-1">
+              Add your input and hit Generate
             </p>
           </div>
         )}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

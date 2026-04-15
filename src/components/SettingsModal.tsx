@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   BookOpen,
   Users,
@@ -8,10 +8,26 @@ import {
   Key,
   Eye,
   EyeOff,
-  X,
   Cpu,
-  Zap,
 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import {
   DocSettings,
   StyleGuide,
@@ -23,7 +39,6 @@ import {
   STYLE_GUIDE_LABELS,
   AUDIENCE_LABELS,
   SURFACE_LABELS,
-  PROVIDER_LABELS,
   GEMINI_MODEL_LABELS,
   OPENROUTER_MODEL_LABELS,
 } from "@/lib/types";
@@ -46,194 +61,151 @@ export default function SettingsModal({
   onApiKeyChange,
 }: SettingsModalProps) {
   const [showKey, setShowKey] = useState(false);
-
-  // Close on Escape
-  useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    if (open) window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
-  }, [open, onClose]);
-
-  // Prevent scroll when open
-  useEffect(() => {
-    if (open) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [open]);
-
-  if (!open) return null;
-
   const isGemini = settings.provider === "gemini";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-        onClick={onClose}
-      />
+    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto gap-0 p-0">
+        <DialogHeader className="px-6 pt-6 pb-4">
+          <DialogTitle>Settings</DialogTitle>
+        </DialogHeader>
 
-      {/* Modal */}
-      <div className="relative w-full max-w-lg max-h-[85vh] overflow-y-auto glass fade-in shadow-2xl shadow-black/40">
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06] sticky top-0 bg-[rgba(10,10,26,0.85)] backdrop-blur-xl z-10">
-          <h2 className="text-base font-semibold text-white/90">Settings</h2>
-          <button
-            onClick={onClose}
-            className="p-1.5 rounded-lg text-white/30 hover:text-white/70 hover:bg-white/[0.06] transition-all"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-
-        <div className="px-6 py-5 space-y-6">
-          {/* Provider Toggle */}
-          <div className="space-y-2.5">
-            <label className="flex items-center gap-2 text-xs font-medium text-white/50 uppercase tracking-wider">
-              <Zap className="w-3.5 h-3.5" />
+        <div className="px-6 pb-6 space-y-6">
+          {/* Provider */}
+          <div className="space-y-2">
+            <Label className="text-xs text-muted-foreground uppercase tracking-wider">
               Provider
-            </label>
-            <div className="flex items-center bg-white/[0.04] rounded-lg p-0.5">
-              {(Object.entries(PROVIDER_LABELS) as [Provider, string][]).map(
-                ([value, label]) => (
-                  <button
-                    key={value}
-                    onClick={() =>
-                      onSettingsChange({ ...settings, provider: value })
-                    }
-                    className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-md text-sm font-medium transition-all ${
-                      settings.provider === value
-                        ? "bg-white/[0.08] text-white/90"
-                        : "text-white/40 hover:text-white/60"
-                    }`}
-                  >
-                    {label}
-                  </button>
-                )
-              )}
-            </div>
+            </Label>
+            <Tabs
+              value={settings.provider}
+              onValueChange={(v) =>
+                onSettingsChange({ ...settings, provider: v as Provider })
+              }
+            >
+              <TabsList className="w-full">
+                <TabsTrigger value="gemini" className="flex-1">
+                  Google Gemini
+                </TabsTrigger>
+                <TabsTrigger value="openrouter" className="flex-1">
+                  OpenRouter
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
           </div>
 
           {/* API Key */}
-          <div className="space-y-2.5">
-            <label className="flex items-center gap-2 text-xs font-medium text-white/50 uppercase tracking-wider">
-              <Key className="w-3.5 h-3.5" />
+          <div className="space-y-2">
+            <Label className="flex items-center gap-1.5 text-xs text-muted-foreground uppercase tracking-wider">
+              <Key className="h-3 w-3" />
               {isGemini ? "Gemini API Key" : "OpenRouter API Key"}
-            </label>
+            </Label>
             <div className="relative">
               <input
                 type={showKey ? "text" : "password"}
                 value={apiKey}
                 onChange={(e) => onApiKeyChange(e.target.value)}
                 placeholder={isGemini ? "AIza..." : "sk-or-..."}
-                className="glass-input w-full px-3.5 py-2.5 pr-10 text-sm"
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 pr-9 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               />
               <button
+                type="button"
                 onClick={() => setShowKey(!showKey)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
               >
                 {showKey ? (
-                  <EyeOff className="w-4 h-4" />
+                  <EyeOff className="h-3.5 w-3.5" />
                 ) : (
-                  <Eye className="w-4 h-4" />
+                  <Eye className="h-3.5 w-3.5" />
                 )}
               </button>
             </div>
-            <p className="text-[11px] text-white/25">
-              {isGemini ? (
-                <>
-                  Get your key from{" "}
-                  <span className="text-indigo-400/60">Google AI Studio</span>
-                </>
-              ) : (
-                <>
-                  Get your key from{" "}
-                  <span className="text-indigo-400/60">openrouter.ai/keys</span>
-                  {" — free models available"}
-                </>
-              )}
+            <p className="text-[11px] text-muted-foreground/60">
+              {isGemini
+                ? "Get your key from Google AI Studio"
+                : "Get your key from openrouter.ai/keys — free models available"}
             </p>
           </div>
 
           {/* Model */}
-          <div className="space-y-2.5">
-            <label className="flex items-center gap-2 text-xs font-medium text-white/50 uppercase tracking-wider">
-              <Cpu className="w-3.5 h-3.5" />
+          <div className="space-y-2">
+            <Label className="flex items-center gap-1.5 text-xs text-muted-foreground uppercase tracking-wider">
+              <Cpu className="h-3 w-3" />
               Model
-            </label>
+            </Label>
             {isGemini ? (
-              <select
+              <Select
                 value={settings.geminiModel}
-                onChange={(e) =>
+                onValueChange={(v) =>
                   onSettingsChange({
                     ...settings,
-                    geminiModel: e.target.value as GeminiModel,
+                    geminiModel: v as GeminiModel,
                   })
                 }
-                className="glass-select w-full"
               >
-                {Object.entries(GEMINI_MODEL_LABELS).map(([value, label]) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <select
-                value={settings.openrouterModel}
-                onChange={(e) =>
-                  onSettingsChange({
-                    ...settings,
-                    openrouterModel: e.target.value as OpenRouterModel,
-                  })
-                }
-                className="glass-select w-full"
-              >
-                {Object.entries(OPENROUTER_MODEL_LABELS).map(
-                  ([value, label]) => (
-                    <option key={value} value={value}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(GEMINI_MODEL_LABELS).map(([val, label]) => (
+                    <SelectItem key={val} value={val}>
                       {label}
-                    </option>
-                  )
-                )}
-              </select>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <Select
+                value={settings.openrouterModel}
+                onValueChange={(v) =>
+                  onSettingsChange({
+                    ...settings,
+                    openrouterModel: v as OpenRouterModel,
+                  })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(OPENROUTER_MODEL_LABELS).map(
+                    ([val, label]) => (
+                      <SelectItem key={val} value={val}>
+                        {label}
+                      </SelectItem>
+                    )
+                  )}
+                </SelectContent>
+              </Select>
             )}
           </div>
 
-          <hr className="border-white/[0.06]" />
+          <Separator />
 
           {/* Style Guide */}
-          <div className="space-y-2.5">
-            <label className="flex items-center gap-2 text-xs font-medium text-white/50 uppercase tracking-wider">
-              <BookOpen className="w-3.5 h-3.5" />
+          <div className="space-y-2">
+            <Label className="flex items-center gap-1.5 text-xs text-muted-foreground uppercase tracking-wider">
+              <BookOpen className="h-3 w-3" />
               Style Guide
-            </label>
-            <select
+            </Label>
+            <Select
               value={settings.styleGuide}
-              onChange={(e) =>
-                onSettingsChange({
-                  ...settings,
-                  styleGuide: e.target.value as StyleGuide,
-                })
+              onValueChange={(v) =>
+                onSettingsChange({ ...settings, styleGuide: v as StyleGuide })
               }
-              className="glass-select w-full"
             >
-              {Object.entries(STYLE_GUIDE_LABELS).map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
-
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.entries(STYLE_GUIDE_LABELS).map(([val, label]) => (
+                  <SelectItem key={val} value={val}>
+                    {label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             {settings.styleGuide === "custom" && (
-              <textarea
+              <Textarea
                 value={settings.customStyleGuidePrompt || ""}
                 onChange={(e) =>
                   onSettingsChange({
@@ -242,70 +214,68 @@ export default function SettingsModal({
                   })
                 }
                 placeholder="Describe your custom style guide rules..."
-                className="glass-input w-full px-3.5 py-2.5 text-sm resize-none h-20"
+                className="resize-none h-20"
               />
             )}
           </div>
 
           {/* Audience */}
-          <div className="space-y-2.5">
-            <label className="flex items-center gap-2 text-xs font-medium text-white/50 uppercase tracking-wider">
-              <Users className="w-3.5 h-3.5" />
+          <div className="space-y-2">
+            <Label className="flex items-center gap-1.5 text-xs text-muted-foreground uppercase tracking-wider">
+              <Users className="h-3 w-3" />
               Audience
-            </label>
-            <select
+            </Label>
+            <Select
               value={settings.audience}
-              onChange={(e) =>
-                onSettingsChange({
-                  ...settings,
-                  audience: e.target.value as Audience,
-                })
+              onValueChange={(v) =>
+                onSettingsChange({ ...settings, audience: v as Audience })
               }
-              className="glass-select w-full"
             >
-              {Object.entries(AUDIENCE_LABELS).map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.entries(AUDIENCE_LABELS).map(([val, label]) => (
+                  <SelectItem key={val} value={val}>
+                    {label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Surface */}
-          <div className="space-y-2.5">
-            <label className="flex items-center gap-2 text-xs font-medium text-white/50 uppercase tracking-wider">
-              <Layout className="w-3.5 h-3.5" />
+          <div className="space-y-2">
+            <Label className="flex items-center gap-1.5 text-xs text-muted-foreground uppercase tracking-wider">
+              <Layout className="h-3 w-3" />
               Surface
-            </label>
-            <select
+            </Label>
+            <Select
               value={settings.surface}
-              onChange={(e) =>
-                onSettingsChange({
-                  ...settings,
-                  surface: e.target.value as Surface,
-                })
+              onValueChange={(v) =>
+                onSettingsChange({ ...settings, surface: v as Surface })
               }
-              className="glass-select w-full"
             >
-              {Object.entries(SURFACE_LABELS).map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.entries(SURFACE_LABELS).map(([val, label]) => (
+                  <SelectItem key={val} value={val}>
+                    {label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="px-6 py-4 border-t border-white/[0.06] sticky bottom-0 bg-[rgba(10,10,26,0.85)] backdrop-blur-xl">
-          <button
-            onClick={onClose}
-            className="btn-primary w-full py-2.5 text-sm font-medium"
-          >
-            <span className="relative z-10">Done</span>
-          </button>
+        <div className="border-t px-6 py-4">
+          <Button onClick={onClose} className="w-full">
+            Done
+          </Button>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

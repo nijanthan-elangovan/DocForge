@@ -5,7 +5,8 @@
       "Bash(mv ghostwriter-app/* .)",
       "Bash(mv ghostwriter-app/.* .)",
       "Bash(rmdir ghostwriter-app:*)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(npx shadcn@latest init -d --base-color neutral --css-variables true)"
     ],
     "additionalDirectories": [
       "c:\\Users\\202211578\\OneDrive - Euclid Innovations\\Documents\\GhostWriter\\src\\app\\shared"

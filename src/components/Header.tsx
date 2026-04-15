@@ -1,6 +1,12 @@
 "use client";
 
-import { Anvil, Sparkles, Settings2 } from "lucide-react";
+import { Anvil, Settings } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface HeaderProps {
   onSettingsClick: () => void;
@@ -8,33 +14,35 @@ interface HeaderProps {
 
 export default function Header({ onSettingsClick }: HeaderProps) {
   return (
-    <header className="relative z-10 flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
-      <div className="flex items-center gap-3">
-        <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/20">
-          <Anvil className="w-5 h-5 text-white" />
+    <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-lg">
+      <div className="flex h-14 items-center justify-between px-4 sm:px-6">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+            <Anvil className="h-4 w-4" />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-sm font-semibold leading-none tracking-tight">
+              DocForge
+            </span>
+            <span className="text-[10px] text-muted-foreground leading-none mt-0.5">
+              AI Documentation Agent
+            </span>
+          </div>
         </div>
-        <div>
-          <h1 className="text-lg font-semibold tracking-tight text-white">
-            DocForge
-          </h1>
-          <p className="text-[11px] text-white/40 -mt-0.5 tracking-wide uppercase">
-            AI Documentation Agent
-          </p>
-        </div>
-      </div>
 
-      <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2 text-[12px] text-white/30">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>Powered by AI</span>
-        </div>
-        <button
-          onClick={onSettingsClick}
-          className="flex items-center gap-2 px-3 py-2 rounded-xl text-white/50 hover:text-white/80 hover:bg-white/[0.06] transition-all text-sm"
-        >
-          <Settings2 className="w-4 h-4" />
-          <span className="hidden sm:inline">Settings</span>
-        </button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onSettingsClick}
+              className="h-8 w-8"
+            >
+              <Settings className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Settings</TooltipContent>
+        </Tooltip>
       </div>
     </header>
   );

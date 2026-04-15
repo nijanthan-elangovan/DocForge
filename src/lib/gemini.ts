@@ -59,7 +59,7 @@ async function generateViaOpenRouter(
       "X-Title": "DocForge",
     },
     body: JSON.stringify({
-      model: model || "google/gemini-2.0-flash-exp:free",
+      model: model || "google/gemma-4-31b-it:free",
       messages: [{ role: "user", content: prompt }],
       temperature: 0.3,
       max_tokens: 8192,

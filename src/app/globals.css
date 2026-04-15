@@ -41,44 +41,44 @@
 }
 
 .dark, :root {
-  --background: 0 0% 5%;
-  --foreground: 0 0% 95%;
-  --card: 0 0% 7%;
-  --card-foreground: 0 0% 95%;
-  --popover: 0 0% 7%;
-  --popover-foreground: 0 0% 95%;
-  --primary: 239 84% 67%;
-  --primary-foreground: 0 0% 100%;
-  --secondary: 0 0% 12%;
-  --secondary-foreground: 0 0% 95%;
-  --muted: 0 0% 12%;
-  --muted-foreground: 0 0% 55%;
-  --accent: 0 0% 12%;
-  --accent-foreground: 0 0% 95%;
-  --destructive: 0 62% 50%;
-  --destructive-foreground: 0 0% 100%;
-  --border: 0 0% 14%;
-  --input: 0 0% 14%;
-  --ring: 239 84% 67%;
-  --sidebar: 0 0% 7%;
-  --sidebar-foreground: 0 0% 95%;
-  --sidebar-primary: 239 84% 67%;
-  --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 0 0% 12%;
-  --sidebar-accent-foreground: 0 0% 95%;
-  --sidebar-border: 0 0% 14%;
-  --sidebar-ring: 239 84% 67%;
+  --background: hsl(0 0% 5%);
+  --foreground: hsl(0 0% 95%);
+  --card: hsl(0 0% 7%);
+  --card-foreground: hsl(0 0% 95%);
+  --popover: hsl(0 0% 9%);
+  --popover-foreground: hsl(0 0% 95%);
+  --primary: hsl(239 84% 67%);
+  --primary-foreground: hsl(0 0% 100%);
+  --secondary: hsl(0 0% 12%);
+  --secondary-foreground: hsl(0 0% 95%);
+  --muted: hsl(0 0% 12%);
+  --muted-foreground: hsl(0 0% 55%);
+  --accent: hsl(0 0% 12%);
+  --accent-foreground: hsl(0 0% 95%);
+  --destructive: hsl(0 62% 50%);
+  --destructive-foreground: hsl(0 0% 100%);
+  --border: hsl(0 0% 14%);
+  --input: hsl(0 0% 14%);
+  --ring: hsl(239 84% 67%);
+  --sidebar: hsl(0 0% 7%);
+  --sidebar-foreground: hsl(0 0% 95%);
+  --sidebar-primary: hsl(239 84% 67%);
+  --sidebar-primary-foreground: hsl(0 0% 100%);
+  --sidebar-accent: hsl(0 0% 12%);
+  --sidebar-accent-foreground: hsl(0 0% 95%);
+  --sidebar-border: hsl(0 0% 14%);
+  --sidebar-ring: hsl(239 84% 67%);
 }
 
 * {
-  border-color: hsl(var(--border));
+  border-color: var(--border);
   scrollbar-width: thin;
-  scrollbar-color: hsl(var(--border)) transparent;
+  scrollbar-color: var(--border) transparent;
 }
 
 body {
-  background: hsl(var(--background));
-  color: hsl(var(--foreground));
+  background: var(--background);
+  color: var(--foreground);
   font-family: var(--font-sans);
 }
 
@@ -95,7 +95,7 @@ body {
 
 /* Prose for markdown preview */
 .prose-forge {
-  color: hsl(var(--foreground));
+  color: var(--foreground);
   line-height: 1.8;
   font-size: 0.9375rem;
 }
@@ -106,7 +106,7 @@ body {
   margin-top: 2rem;
   margin-bottom: 0.75rem;
   letter-spacing: -0.03em;
-  color: hsl(var(--foreground));
+  color: var(--foreground);
 }
 
 .prose-forge h2 {
@@ -115,7 +115,7 @@ body {
   margin-top: 1.75rem;
   margin-bottom: 0.5rem;
   letter-spacing: -0.02em;
-  color: hsl(var(--foreground));
+  color: var(--foreground);
 }
 
 .prose-forge h3 {
@@ -123,12 +123,12 @@ body {
   font-weight: 600;
   margin-top: 1.5rem;
   margin-bottom: 0.5rem;
-  color: hsl(var(--foreground));
+  color: var(--foreground);
 }
 
 .prose-forge p {
   margin-bottom: 1rem;
-  color: hsl(var(--muted-foreground));
+  color: var(--muted-foreground);
 }
 
 .prose-forge ul, .prose-forge ol {
@@ -138,14 +138,14 @@ body {
 
 .prose-forge li {
   margin-bottom: 0.25rem;
-  color: hsl(var(--muted-foreground));
+  color: var(--muted-foreground);
 }
 
 .prose-forge ul li { list-style-type: disc; }
 .prose-forge ol li { list-style-type: decimal; }
 
 .prose-forge code {
-  background: hsl(var(--secondary));
+  background: var(--secondary);
   padding: 2px 6px;
   border-radius: 4px;
   font-size: 0.85em;
@@ -155,7 +155,7 @@ body {
 
 .prose-forge pre {
   background: hsl(0 0% 4%);
-  border: 1px solid hsl(var(--border));
+  border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 1rem;
   margin-bottom: 1rem;
@@ -165,15 +165,15 @@ body {
 .prose-forge pre code {
   background: none;
   padding: 0;
-  color: hsl(var(--muted-foreground));
+  color: var(--muted-foreground);
   font-size: 0.8125rem;
 }
 
 .prose-forge blockquote {
-  border-left: 3px solid hsl(var(--primary));
+  border-left: 3px solid var(--primary);
   padding-left: 1rem;
   margin-bottom: 1rem;
-  color: hsl(var(--muted-foreground));
+  color: var(--muted-foreground);
   font-style: italic;
 }
 
@@ -185,24 +185,24 @@ body {
 
 .prose-forge th,
 .prose-forge td {
-  border: 1px solid hsl(var(--border));
+  border: 1px solid var(--border);
   padding: 8px 12px;
   text-align: left;
 }
 
 .prose-forge th {
-  background: hsl(var(--secondary));
+  background: var(--secondary);
   font-weight: 600;
 }
 
 .prose-forge hr {
   border: none;
-  border-top: 1px solid hsl(var(--border));
+  border-top: 1px solid var(--border);
   margin: 1.5rem 0;
 }
 
 .prose-forge a {
-  color: hsl(var(--primary));
+  color: var(--primary);
   text-decoration: underline;
   text-underline-offset: 2px;
 }
@@ -216,9 +216,9 @@ body {
 .shimmer {
   background: linear-gradient(
     90deg,
-    hsl(var(--secondary)) 25%,
+    var(--secondary) 25%,
     hsl(0 0% 15%) 50%,
-    hsl(var(--secondary)) 75%
+    var(--secondary) 75%
   );
   background-size: 200% 100%;
   animation: shimmer 2s ease-in-out infinite;

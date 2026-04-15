@@ -115,56 +115,58 @@ export default function InputArea({ rawInput, onInputChange }: InputAreaProps) {
   return (
     <Card className="flex flex-col min-h-0">
       <CardHeader className="pb-3 space-y-0">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <CardTitle className="text-sm font-medium">Source Input</CardTitle>
+        <div className="flex items-center justify-between gap-2">
+          <CardTitle className="text-sm font-medium shrink-0">
+            Source Input
+          </CardTitle>
+
+          <div className="flex items-center gap-1.5 min-w-0">
             {hasContent && (
               <Badge
                 variant="outline"
-                className="text-[10px] font-normal text-muted-foreground/60 px-1.5 py-0"
+                className="text-[10px] font-normal text-muted-foreground/60 px-1.5 py-0 shrink-0"
               >
                 {formatSize(rawInput.length)}
               </Badge>
             )}
-          </div>
 
-          <div className="flex items-center gap-2">
             {(fileName || repoName) && (
-              <div className="flex items-center gap-1.5">
+              <>
                 <Badge
                   variant="secondary"
-                  className="gap-1 text-xs font-normal max-w-[160px] truncate"
+                  className="gap-1 text-[10px] font-normal max-w-[120px] shrink min-w-0"
                 >
                   {repoName ? (
-                    <GitFork className="h-3 w-3 shrink-0" />
+                    <GitFork className="h-2.5 w-2.5 shrink-0" />
                   ) : (
-                    <FileText className="h-3 w-3 shrink-0" />
+                    <FileText className="h-2.5 w-2.5 shrink-0" />
                   )}
                   <span className="truncate">{repoName || fileName}</span>
                 </Badge>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-5 w-5"
+                  className="h-5 w-5 shrink-0"
                   onClick={clearFile}
                 >
                   <X className="h-3 w-3" />
                 </Button>
-              </div>
+              </>
             )}
 
             <Tabs
               value={inputMode}
               onValueChange={(v) => setInputMode(v as InputMode)}
+              className="shrink-0"
             >
               <TabsList className="h-7">
-                <TabsTrigger value="text" className="text-xs px-2.5 h-5 gap-1">
+                <TabsTrigger value="text" className="text-xs px-2 h-5 gap-1">
                   <FileText className="h-3 w-3" />
                   File
                 </TabsTrigger>
                 <TabsTrigger
                   value="github"
-                  className="text-xs px-2.5 h-5 gap-1"
+                  className="text-xs px-2 h-5 gap-1"
                 >
                   <GitFork className="h-3 w-3" />
                   GitHub

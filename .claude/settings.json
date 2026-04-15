@@ -6,7 +6,9 @@
       "Bash(mv ghostwriter-app/.* .)",
       "Bash(rmdir ghostwriter-app:*)",
       "Bash(npm run:*)",
-      "Bash(npx shadcn@latest init -d --base-color neutral --css-variables true)"
+      "Bash(npx shadcn@latest init -d --base-color neutral --css-variables true)",
+      "Bash(curl -s -X POST https://cfyxyigrkhuthpmsqsdz.supabase.co/rest/v1/rpc -H 'apikey: sb_publishable_YH0ogb8OeCC_5CMg-kLvtg_hyZQvE40' -H 'Authorization: Bearer sb_publishable_YH0ogb8OeCC_5CMg-kLvtg_hyZQvE40' -H 'Content-Type: application/json')",
+      "Bash(PGPASSWORD='uF2P8az+j/4*%*@' psql \"postgresql://postgres.cfyxyigrkhuthpmsqsdz:uF2P8az+j/4*%*@@db.cfyxyigrkhuthpmsqsdz.supabase.co:5432/postgres\" -f \"c:/Users/202211578/OneDrive - Euclid Innovations/Documents/GhostWriter/supabase-setup.sql\")"
     ],
     "additionalDirectories": [
       "c:\\Users\\202211578\\OneDrive - Euclid Innovations\\Documents\\GhostWriter\\src\\app\\shared"

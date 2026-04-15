@@ -9,6 +9,8 @@ import {
   GitFork,
   Loader2,
   ArrowRight,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,18 +26,29 @@ interface InputAreaProps {
   onInputChange: (input: string) => void;
 }
 
+function formatSize(chars: number): string {
+  if (chars < 1000) return `${chars} chars`;
+  if (chars < 1_000_000) return `${(chars / 1000).toFixed(1)}K chars`;
+  return `${(chars / 1_000_000).toFixed(1)}M chars`;
+}
+
 export default function InputArea({ rawInput, onInputChange }: InputAreaProps) {
   const [fileName, setFileName] = useState<string | null>(null);
   const [inputMode, setInputMode] = useState<InputMode>("text");
   const [repoUrl, setRepoUrl] = useState("");
   const [fetchingRepo, setFetchingRepo] = useState(false);
   const [repoName, setRepoName] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState(false);
+
+  const hasContent = rawInput.length > 0;
+  const isLarge = rawInput.length > 500;
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
       const file = acceptedFiles[0];
       if (!file) return;
       setFileName(file.name);
+      setExpanded(false);
       const reader = new FileReader();
       reader.onload = (e) => {
         const text = e.target?.result;
@@ -63,6 +76,7 @@ export default function InputArea({ rawInput, onInputChange }: InputAreaProps) {
   const clearFile = () => {
     setFileName(null);
     setRepoName(null);
+    setExpanded(false);
     onInputChange("");
   };
 
@@ -82,6 +96,7 @@ export default function InputArea({ rawInput, onInputChange }: InputAreaProps) {
       if (!res.ok) throw new Error(data.error || "Failed to fetch repository");
       onInputChange(data.content);
       setRepoName(data.repoName);
+      setExpanded(false);
       toast.success(`Fetched ${data.repoName}`);
     } catch (error: unknown) {
       const message =
@@ -92,22 +107,40 @@ export default function InputArea({ rawInput, onInputChange }: InputAreaProps) {
     }
   };
 
+  // Collapsed content preview: show first few lines
+  const previewLines = rawInput.split("\n").slice(0, 6).join("\n");
+  const previewText =
+    rawInput.length > 300 ? rawInput.slice(0, 300) + "..." : previewLines;
+
   return (
-    <Card className="flex flex-col flex-1 min-h-0">
+    <Card className="flex flex-col min-h-0">
       <CardHeader className="pb-3 space-y-0">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-sm font-medium">Source Input</CardTitle>
+          <div className="flex items-center gap-2">
+            <CardTitle className="text-sm font-medium">Source Input</CardTitle>
+            {hasContent && (
+              <Badge
+                variant="outline"
+                className="text-[10px] font-normal text-muted-foreground/60 px-1.5 py-0"
+              >
+                {formatSize(rawInput.length)}
+              </Badge>
+            )}
+          </div>
 
           <div className="flex items-center gap-2">
             {(fileName || repoName) && (
               <div className="flex items-center gap-1.5">
-                <Badge variant="secondary" className="gap-1 text-xs font-normal">
+                <Badge
+                  variant="secondary"
+                  className="gap-1 text-xs font-normal max-w-[160px] truncate"
+                >
                   {repoName ? (
-                    <GitFork className="h-3 w-3" />
+                    <GitFork className="h-3 w-3 shrink-0" />
                   ) : (
-                    <FileText className="h-3 w-3" />
+                    <FileText className="h-3 w-3 shrink-0" />
                   )}
-                  {repoName || fileName}
+                  <span className="truncate">{repoName || fileName}</span>
                 </Badge>
                 <Button
                   variant="ghost"
@@ -142,39 +175,76 @@ export default function InputArea({ rawInput, onInputChange }: InputAreaProps) {
         </div>
       </CardHeader>
 
-      <CardContent className="flex flex-col flex-1 min-h-0 gap-3 pt-0">
+      <CardContent className="flex flex-col min-h-0 gap-3 pt-0">
         {inputMode === "text" ? (
           <>
-            <div
-              {...getRootProps()}
-              className={`flex flex-col items-center justify-center rounded-lg border-2 border-dashed py-6 px-4 text-center cursor-pointer transition-colors ${
-                isDragActive
-                  ? "border-primary/50 bg-primary/5"
-                  : "border-border hover:border-muted-foreground/25 hover:bg-muted/50"
-              }`}
-            >
-              <input {...getInputProps()} />
-              <Upload
-                className={`h-5 w-5 mb-2 ${
-                  isDragActive ? "text-primary" : "text-muted-foreground/40"
+            {/* Drop zone — hide when content loaded */}
+            {!hasContent && (
+              <div
+                {...getRootProps()}
+                className={`flex flex-col items-center justify-center rounded-lg border-2 border-dashed py-6 px-4 text-center cursor-pointer transition-colors ${
+                  isDragActive
+                    ? "border-primary/50 bg-primary/5"
+                    : "border-border hover:border-muted-foreground/25 hover:bg-muted/50"
+                }`}
+              >
+                <input {...getInputProps()} />
+                <Upload
+                  className={`h-5 w-5 mb-2 ${
+                    isDragActive ? "text-primary" : "text-muted-foreground/40"
+                  }`}
+                />
+                <p className="text-xs text-muted-foreground">
+                  {isDragActive
+                    ? "Drop your file here..."
+                    : "Drop a file or click to upload"}
+                </p>
+                <p className="text-[10px] text-muted-foreground/50 mt-1">
+                  .txt .md .html .json .csv
+                </p>
+              </div>
+            )}
+
+            {/* Textarea — full when no content or expanded, collapsed preview otherwise */}
+            {!hasContent || !isLarge || expanded ? (
+              <Textarea
+                value={rawInput}
+                onChange={(e) => onInputChange(e.target.value)}
+                placeholder="Or paste your unstructured notes, requirements, specs, or raw documentation here..."
+                className={`resize-none text-sm leading-relaxed ${
+                  expanded ? "min-h-[220px] max-h-[350px]" : "min-h-[180px]"
                 }`}
               />
-              <p className="text-xs text-muted-foreground">
-                {isDragActive
-                  ? "Drop your file here..."
-                  : "Drop a file or click to upload"}
-              </p>
-              <p className="text-[10px] text-muted-foreground/50 mt-1">
-                .txt .md .html .json .csv
-              </p>
-            </div>
+            ) : (
+              <div className="relative">
+                <pre className="rounded-md border border-input bg-transparent px-3 py-2 text-sm text-muted-foreground font-mono leading-relaxed whitespace-pre-wrap max-h-[120px] overflow-hidden">
+                  {previewText}
+                </pre>
+                <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-card to-transparent rounded-b-md" />
+              </div>
+            )}
 
-            <Textarea
-              value={rawInput}
-              onChange={(e) => onInputChange(e.target.value)}
-              placeholder="Or paste your unstructured notes, requirements, specs, or raw documentation here..."
-              className="flex-1 min-h-[180px] resize-none text-sm leading-relaxed"
-            />
+            {/* Expand/collapse for loaded content */}
+            {hasContent && isLarge && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full h-7 text-xs text-muted-foreground"
+                onClick={() => setExpanded(!expanded)}
+              >
+                {expanded ? (
+                  <>
+                    <ChevronUp className="h-3 w-3 mr-1" />
+                    Collapse
+                  </>
+                ) : (
+                  <>
+                    <ChevronDown className="h-3 w-3 mr-1" />
+                    Expand to edit ({formatSize(rawInput.length)})
+                  </>
+                )}
+              </Button>
+            )}
           </>
         ) : (
           <>
@@ -212,13 +282,47 @@ export default function InputArea({ rawInput, onInputChange }: InputAreaProps) {
               repos.
             </p>
 
-            <Textarea
-              value={rawInput}
-              onChange={(e) => onInputChange(e.target.value)}
-              placeholder="Fetched repository content will appear here..."
-              className="flex-1 min-h-[180px] resize-none text-xs font-mono leading-relaxed"
-              readOnly={fetchingRepo}
-            />
+            {/* Collapsed preview for fetched content */}
+            {hasContent && !expanded ? (
+              <>
+                <div className="relative">
+                  <pre className="rounded-md border border-input bg-transparent px-3 py-2 text-xs font-mono text-muted-foreground leading-relaxed whitespace-pre-wrap max-h-[120px] overflow-hidden">
+                    {previewText}
+                  </pre>
+                  <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-card to-transparent rounded-b-md" />
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full h-7 text-xs text-muted-foreground"
+                  onClick={() => setExpanded(true)}
+                >
+                  <ChevronDown className="h-3 w-3 mr-1" />
+                  Expand to edit ({formatSize(rawInput.length)})
+                </Button>
+              </>
+            ) : (
+              <>
+                <Textarea
+                  value={rawInput}
+                  onChange={(e) => onInputChange(e.target.value)}
+                  placeholder="Fetched repository content will appear here..."
+                  className="resize-none text-xs font-mono leading-relaxed min-h-[180px] max-h-[350px]"
+                  readOnly={fetchingRepo}
+                />
+                {hasContent && isLarge && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full h-7 text-xs text-muted-foreground"
+                    onClick={() => setExpanded(false)}
+                  >
+                    <ChevronUp className="h-3 w-3 mr-1" />
+                    Collapse
+                  </Button>
+                )}
+              </>
+            )}
           </>
         )}
       </CardContent>

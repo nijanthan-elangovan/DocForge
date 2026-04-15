@@ -10,7 +10,8 @@ import { Card, CardContent } from "@/components/ui/card";
 interface SharedDoc {
   markdown: string;
   title: string;
-  createdAt: number;
+  createdAt: string;
+  expiresAt: string;
 }
 
 export default function SharedDocPage({
@@ -136,6 +137,11 @@ export default function SharedDocPage({
           </Card>
           <p className="text-center text-[11px] text-muted-foreground/40 mt-6">
             Generated with DocForge
+            {doc.expiresAt && (
+              <span className="block mt-1">
+                Expires {new Date(doc.expiresAt).toLocaleDateString()}
+              </span>
+            )}
           </p>
         </main>
       </div>

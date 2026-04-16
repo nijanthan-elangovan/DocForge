@@ -98,3 +98,8 @@ export const SURFACE_LABELS: Record<Surface, string> = {
   readme: "README / Guide",
   "internal-wiki": "Internal Wiki",
 };
+
+export interface ChatMessage {
+  role: "user" | "assistant";
+  content: string;
+}

@@ -1,17 +1,20 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Toaster } from "react-hot-toast";
 import toast from "react-hot-toast";
-import { Wand2, Loader2, MessageSquare } from "lucide-react";
+import { Wand2, Loader2, MessageSquare, Eye, Bot } from "lucide-react";
 import Header from "@/components/Header";
 import SettingsModal from "@/components/SettingsModal";
+import HistoryPanel from "@/components/HistoryPanel";
 import InputArea from "@/components/InputArea";
 import PreviewPanel from "@/components/PreviewPanel";
+import ChatPanel from "@/components/ChatPanel";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { DocSettings } from "@/lib/types";
+import { DocSettings, ChatMessage } from "@/lib/types";
 
 const DEFAULT_SETTINGS: DocSettings = {
   styleGuide: "google",
@@ -34,6 +37,12 @@ export default function Home() {
   const [markdown, setMarkdown] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const [rightTab, setRightTab] = useState<"preview" | "chat">("preview");
+
+  // Chat session state
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [chatSessionId, setChatSessionId] = useState<string | null>(null);
 
   const apiKey = settings.provider === "gemini" ? geminiKey : openrouterKey;
 
@@ -54,6 +63,27 @@ export default function Home() {
     }
   };
 
+  // Save article to history
+  const saveArticle = useCallback(
+    async (title: string, md: string) => {
+      try {
+        await fetch("/api/history", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title,
+            markdown: md,
+            sourcePreview: rawInput.slice(0, 200),
+            settings,
+          }),
+        });
+      } catch {
+        // silent — don't block UX for save failures
+      }
+    },
+    [rawInput, settings]
+  );
+
   const handleGenerate = async () => {
     if (!apiKey.trim()) {
       toast.error(
@@ -68,6 +98,7 @@ export default function Home() {
 
     setIsGenerating(true);
     setMarkdown("");
+    setRightTab("preview");
 
     try {
       const res = await fetch("/api/generate", {
@@ -80,6 +111,10 @@ export default function Home() {
 
       setMarkdown(data.markdown);
       toast.success("Documentation generated!");
+
+      // Auto-save to history
+      const docTitle = data.markdown.match(/^#\s+(.+)$/m)?.[1] || "Untitled Document";
+      saveArticle(docTitle, data.markdown);
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : "Something went wrong";
@@ -88,6 +123,45 @@ export default function Home() {
       setIsGenerating(false);
     }
   };
+
+  // Load article from history
+  const handleLoadArticle = async (id: string) => {
+    try {
+      const res = await fetch(`/api/history?id=${id}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to load article");
+
+      setMarkdown(data.article.markdown);
+      setRightTab("preview");
+      toast.success("Article loaded from history");
+    } catch {
+      toast.error("Failed to load article");
+    }
+  };
+
+  // Load chat session from history
+  const handleLoadChat = async (id: string) => {
+    try {
+      const res = await fetch(`/api/chat-session?id=${id}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to load chat");
+
+      setChatMessages(data.session.messages || []);
+      setChatSessionId(data.session.id);
+      setRightTab("chat");
+      toast.success("Chat session restored");
+    } catch {
+      toast.error("Failed to load chat session");
+    }
+  };
+
+  const handleChatSessionUpdate = useCallback(
+    (sessionId: string, msgs: ChatMessage[]) => {
+      setChatSessionId(sessionId);
+      setChatMessages(msgs);
+    },
+    []
+  );
 
   const title = markdown.match(/^#\s+(.+)$/m)?.[1] || "Untitled Document";
 
@@ -117,12 +191,22 @@ export default function Home() {
         onApiKeyChange={handleApiKeyChange}
       />
 
-      <div className="relative z-10 flex flex-col min-h-screen">
-        <Header onSettingsClick={() => setShowSettings(true)} />
+      <HistoryPanel
+        open={showHistory}
+        onClose={() => setShowHistory(false)}
+        onLoadArticle={handleLoadArticle}
+        onLoadChat={handleLoadChat}
+      />
 
-        <main className="flex-1 flex flex-col lg:flex-row gap-4 p-4 min-h-0">
+      <div className="relative z-10 flex flex-col h-screen overflow-hidden">
+        <Header
+          onSettingsClick={() => setShowSettings(true)}
+          onHistoryClick={() => setShowHistory(true)}
+        />
+
+        <main className="flex-1 flex flex-col lg:flex-row gap-4 p-4 min-h-0 overflow-hidden">
           {/* Left — Input */}
-          <div className="flex flex-col gap-3 w-full lg:w-[460px] shrink-0">
+          <div className="flex flex-col gap-3 w-full lg:w-[460px] shrink-0 overflow-y-auto">
             <InputArea rawInput={rawInput} onInputChange={setRawInput} />
 
             {/* Instructions */}
@@ -167,13 +251,48 @@ export default function Home() {
             </Button>
           </div>
 
-          {/* Right — Preview */}
-          <div className="flex-1 flex flex-col min-h-0 min-w-0">
-            <PreviewPanel
-              markdown={markdown}
-              isGenerating={isGenerating}
-              title={title}
-            />
+          {/* Right — Preview / Chat */}
+          <div className="flex-1 flex flex-col min-h-0 min-w-0 gap-2">
+            {/* Tab switcher */}
+            <Tabs
+              value={rightTab}
+              onValueChange={(v) => setRightTab(v as "preview" | "chat")}
+            >
+              <TabsList className="h-8 w-fit">
+                <TabsTrigger value="preview" className="text-xs px-3 h-6 gap-1.5">
+                  <Eye className="h-3 w-3" />
+                  Preview
+                </TabsTrigger>
+                <TabsTrigger
+                  value="chat"
+                  className="text-xs px-3 h-6 gap-1.5"
+                  disabled={!rawInput.trim()}
+                >
+                  <Bot className="h-3 w-3" />
+                  Chat with Source
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+
+            {/* Tab content */}
+            <div className="flex-1 flex flex-col min-h-0">
+              {rightTab === "preview" ? (
+                <PreviewPanel
+                  markdown={markdown}
+                  isGenerating={isGenerating}
+                  title={title}
+                />
+              ) : (
+                <ChatPanel
+                  sourceContext={rawInput}
+                  settings={settings}
+                  apiKey={apiKey}
+                  initialMessages={chatMessages}
+                  sessionId={chatSessionId}
+                  onSessionUpdate={handleChatSessionUpdate}
+                />
+              )}
+            </div>
           </div>
         </main>
       </div>

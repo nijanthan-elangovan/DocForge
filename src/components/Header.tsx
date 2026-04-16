@@ -1,6 +1,6 @@
 "use client";
 
-import { Anvil, Settings } from "lucide-react";
+import { Anvil, Settings, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -10,9 +10,10 @@ import {
 
 interface HeaderProps {
   onSettingsClick: () => void;
+  onHistoryClick: () => void;
 }
 
-export default function Header({ onSettingsClick }: HeaderProps) {
+export default function Header({ onSettingsClick, onHistoryClick }: HeaderProps) {
   return (
     <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-lg">
       <div className="flex h-14 items-center justify-between px-4 sm:px-6">
@@ -30,19 +31,35 @@ export default function Header({ onSettingsClick }: HeaderProps) {
           </div>
         </div>
 
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onSettingsClick}
-              className="h-8 w-8"
-            >
-              <Settings className="h-4 w-4" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>Settings</TooltipContent>
-        </Tooltip>
+        <div className="flex items-center gap-1">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onHistoryClick}
+                className="h-8 w-8"
+              >
+                <History className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>History</TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onSettingsClick}
+                className="h-8 w-8"
+              >
+                <Settings className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Settings</TooltipContent>
+          </Tooltip>
+        </div>
       </div>
     </header>
   );
